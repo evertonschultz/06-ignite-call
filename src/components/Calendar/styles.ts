@@ -81,6 +81,26 @@ export const CalendarDay = styled('button', {
   cursor: 'pointer',
   borderRadius: '$sm',
 
+  variants: {
+    selected: {
+      true: {
+        '&:after': {
+          '@media(min-width: 860px)': {
+            content: '',
+            position: 'absolute',
+            display: 'flex',
+            marginLeft: '30px',
+            marginTop: '-20px',
+            background: '$gray100',
+            height: '5px',
+            width: '5px',
+            borderRadius: '$full',
+          },
+        },
+      },
+    },
+  },
+
   '&:disabled': {
     background: 'none',
     cursor: 'default',

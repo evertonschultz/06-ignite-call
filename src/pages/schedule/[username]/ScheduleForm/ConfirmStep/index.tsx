@@ -21,11 +21,13 @@ type ConfirmFormData = z.infer<typeof confirmFromSchema>
 interface ConfirmStepProps {
   schedulingDate: Date
   onResetScheduleDate: () => void
+  onConfirmedAppointment: () => void
 }
 
 export function ConfirmStep({
   schedulingDate,
   onResetScheduleDate,
+  onConfirmedAppointment,
 }: ConfirmStepProps) {
   const {
     register,
@@ -46,7 +48,7 @@ export function ConfirmStep({
       date: schedulingDate,
     })
 
-    onResetScheduleDate()
+    onConfirmedAppointment()
   }
 
   const describedDate = dayjs(schedulingDate).format('DD[ de ]MMMM[ de ]YYYY')

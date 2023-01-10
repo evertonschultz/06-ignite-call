@@ -5,6 +5,8 @@ import { CaretLeft, CaretRight } from 'phosphor-react'
 import { useMemo, useState } from 'react'
 import { api } from '../../lib/axios'
 import { getWeekDays } from '../../utils/get-week-days'
+import { Loading } from '../Loading'
+import { Tooltip } from '../Tooltip'
 import {
   CalendarActions,
   CalendarBody,
@@ -26,12 +28,17 @@ type CalendarWeeks = CalendarWeek[]
 
 interface BlockedDates {
   blockedWeekDays: number[]
-  blockedDates: number[]
+  blockedDate: number[]
 }
 
 interface CalendarProps {
   selectedDate?: Date | null
   onDateSelected: (date: Date) => void
+}
+
+interface Availability {
+  possibleTimes: number[]
+  availableTimes: number[]
 }
 
 export function Calendar({ selectedDate, onDateSelected }: CalendarProps) {
@@ -67,6 +74,21 @@ export function Calendar({ selectedDate, onDateSelected }: CalendarProps) {
         params: {
           year: currentDate.get('year'),
           month: currentDate.get('month') + 1,
+        },
+      })
+
+      return response.data
+    },
+  )
+
+  const today = dayjs(new Date()).format('YYYY-MM-DD')
+
+  const { data: availability } = useQuery<Availability>(
+    ['availability', today],
+    async () => {
+      const response = await api.get(`/users/${username}/availability`, {
+        params: {
+          date: today,
         },
       })
 
@@ -118,7 +140,9 @@ export function Calendar({ selectedDate, onDateSelected }: CalendarProps) {
           disabled:
             date.endOf('day').isBefore(new Date()) ||
             blockedDates.blockedWeekDays.includes(date.get('day')) ||
-            blockedDates.blockedDates?.includes(date.get('date')),
+            blockedDates.blockedDate?.includes(date.get('date')) ||
+            (today === dayjs(date).format('YYYY-MM-DD') &&
+              availability?.availableTimes.length === 0),
         }
       }),
       ...nextMonthFillArray.map((date) => {
@@ -142,8 +166,15 @@ export function Calendar({ selectedDate, onDateSelected }: CalendarProps) {
     )
 
     return calendarWeeks
-  }, [currentDate, blockedDates])
+  }, [blockedDates, currentDate, today, availability?.availableTimes.length])
 
+  if (!calendarWeeks || !availability || !blockedDates) {
+    return (
+      <CalendarContainer>
+        <Loading />
+      </CalendarContainer>
+    )
+  }
   return (
     <CalendarContainer>
       <CalendarHeader>
@@ -180,8 +211,15 @@ export function Calendar({ selectedDate, onDateSelected }: CalendarProps) {
                       <CalendarDay
                         onClick={() => onDateSelected(date.toDate())}
                         disabled={disabled}
+                        selected={date.isSame(selectedDate)}
                       >
-                        {date.get('date')}
+                        <Tooltip
+                          content={String(date.get('date'))}
+                          description={`${date.format('DD[ de ]MMMM')} ${
+                            disabled ? '- Indisponível' : '- Disponível'
+                          }`}
+                          available={disabled}
+                        />
                       </CalendarDay>
                     </td>
                   )

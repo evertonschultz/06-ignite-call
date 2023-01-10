@@ -3,6 +3,7 @@ import dayjs from 'dayjs'
 import { useRouter } from 'next/router'
 import { useState } from 'react'
 import { Calendar } from '../../../../../components/Calendar'
+import { Loading } from '../../../../../components/Loading'
 import { api } from '../../../../../lib/axios'
 import {
   Container,
@@ -73,19 +74,23 @@ export function CalendarStep({ onSelectDateTime }: CalendarStepProps) {
             {weekDay} <span>{describedDate}</span>
           </TimePickerHeader>
 
-          <TimePickerList>
-            {availability?.possibleTimes.map((hour) => {
-              return (
-                <TimePickerItem
-                  key={hour}
-                  onClick={() => handleSelectTime(hour)}
-                  disabled={!availability.availableTimes.includes(hour)}
-                >
-                  {String(hour).padStart(2, '0')}:00h
-                </TimePickerItem>
-              )
-            })}
-          </TimePickerList>
+          {availability ? (
+            <TimePickerList>
+              {availability?.possibleTimes.map((hour) => {
+                return (
+                  <TimePickerItem
+                    key={hour}
+                    onClick={() => handleSelectTime(hour)}
+                    disabled={!availability.availableTimes.includes(hour)}
+                  >
+                    {String(hour).padStart(2, '0')}:00h
+                  </TimePickerItem>
+                )
+              })}
+            </TimePickerList>
+          ) : (
+            <Loading />
+          )}
         </TimePicker>
       )}
     </Container>
