@@ -141,7 +141,7 @@ export function Calendar({ selectedDate, onDateSelected }: CalendarProps) {
             date.endOf('day').isBefore(new Date()) ||
             blockedDates.blockedWeekDays.includes(date.get('day')) ||
             blockedDates.blockedDate?.includes(date.get('date')) ||
-            (today === dayjs(date).format('YYYY-MM-DD') &&
+            (dayjs(date).format('YYYY-MM-DD') === today &&
               availability?.availableTimes.length === 0),
         }
       }),
